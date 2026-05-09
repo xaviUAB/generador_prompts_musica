@@ -1,0 +1,1243 @@
+<!DOCTYPE html>
+<html lang="ca">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Generador de Prompts per a Suno AI - Estil Ingeniería Musical</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f8fafc;
+            color: #1e293b;
+        }
+        
+        .glass-panel {
+            background: white;
+            border-radius: 1rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            border: 1px solid #e2e8f0;
+        }
+
+        .gradient-text {
+            background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%);
+            color: white;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+        }
+
+        .btn-secondary {
+            background-color: #f1f5f9;
+            color: #475569;
+            transition: all 0.2s ease;
+        }
+
+        .btn-secondary:hover {
+            background-color: #e2e8f0;
+            color: #1e293b;
+        }
+
+        @keyframes slideUp {
+            from { opacity: 0; transform: translate(-50%, 20px); }
+            to { opacity: 1; transform: translate(-50%, 0); }
+        }
+
+        .toast-notification {
+            animation: slideUp 0.3s ease forwards;
+        }
+
+        select {
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
+            background-position: right 0.5rem center;
+            background-repeat: no-repeat;
+            background-size: 1.5em 1.5em;
+        }
+
+        .tab-active {
+            border-bottom: 2px solid #8b5cf6;
+            color: #8b5cf6;
+            font-weight: 600;
+        }
+
+        .chip {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            background-color: #f1f5f9;
+            color: #475569;
+            font-size: 0.75rem;
+            border-radius: 9999px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            border: 1px solid #e2e8f0;
+            user-select: none;
+        }
+        
+        .chip:hover {
+            background-color: #dbeafe;
+            color: #1d4ed8;
+            border-color: #bfdbfe;
+        }
+
+        .chip-active {
+            background-color: #3b82f6 !important;
+            color: white !important;
+            border-color: #2563eb !important;
+        }
+
+        /* Estils per amagar la fletxa per defecte dels detalls */
+        details > summary {
+            list-style: none;
+        }
+        details > summary::-webkit-details-marker {
+            display: none;
+        }
+        
+        optgroup {
+            font-weight: 700;
+            color: #4f46e5;
+            background-color: #f8fafc;
+        }
+        option {
+            font-weight: 400;
+            color: #1e293b;
+            background-color: white;
+            padding: 4px;
+        }
+    </style>
+</head>
+
+<body class="min-h-screen p-4 md:p-8">
+    <div class="max-w-7xl mx-auto flex flex-col lg:flex-row gap-8">
+        
+        <!-- Columna Esquerra: Configuració i Formulari -->
+        <div class="lg:w-2/3 space-y-6">
+            <header class="text-center lg:text-left mb-6">
+                <h1 class="text-4xl md:text-5xl font-bold mb-4 gradient-text">Generador de Prompts Suno</h1>
+                <p class="text-slate-500 text-lg">Crea descripcions d'estil musical detallades en segons.</p>
+            </header>
+
+            <div class="glass-panel p-6 md:p-8">
+                <!-- Secció de Plantilles -->
+                <div class="mb-8 p-5 bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-100 rounded-xl">
+                    <h3 class="text-sm font-bold text-blue-800 mb-3 uppercase tracking-wider flex items-center gap-2">
+                        <i class="fa-solid fa-bolt text-amber-500"></i> Plantilles Ràpides
+                    </h3>
+                    <div class="flex flex-wrap gap-2">
+                        <button type="button" onclick="applyPreset('epic')" class="px-4 py-2 bg-white border border-blue-200 text-blue-700 font-medium text-sm rounded-lg hover:bg-blue-600 hover:text-white hover:border-blue-600 transition-all shadow-sm">🎬 Tràiler Èpic</button>
+                        <button type="button" onclick="applyPreset('synthwave')" class="px-4 py-2 bg-white border border-blue-200 text-blue-700 font-medium text-sm rounded-lg hover:bg-blue-600 hover:text-white hover:border-blue-600 transition-all shadow-sm">🌃 Nit Synthwave</button>
+                        <button type="button" onclick="applyPreset('lofi')" class="px-4 py-2 bg-white border border-blue-200 text-blue-700 font-medium text-sm rounded-lg hover:bg-blue-600 hover:text-white hover:border-blue-600 transition-all shadow-sm">☕ Lo-Fi Chill</button>
+                        <button type="button" onclick="applyPreset('pop')" class="px-4 py-2 bg-white border border-blue-200 text-blue-700 font-medium text-sm rounded-lg hover:bg-blue-600 hover:text-white hover:border-blue-600 transition-all shadow-sm">🎸 Pop Acústic</button>
+                    </div>
+                </div>
+
+                <div class="flex border-b border-slate-200 mb-6">
+                    <button class="px-4 py-2 tab-active focus:outline-none transition-colors">Generador</button>
+                </div>
+
+                <form id="promptForm" class="space-y-6">
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                                                        <label class="block text-sm font-medium text-slate-700 mb-2" for="genre">1. Gènere Principal <span class="text-red-500">*</span></label>
+                            <select id="genre" onchange="generatePrompt()" class="w-full p-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-shadow text-slate-700 bg-white" required>
+                                <option value="" title="Tria la base estilística sobre la qual es construirà la cançó.">Selecciona un gènere...</option>
+                                
+                                <optgroup label="Pop">
+                                    <option value="pop" title="Música popular, accessible, melòdica i amb tornades molt enganxoses.">Pop</option>
+                                    <option value="synthpop" title="Pop basat en sintetitzadors, amb forta estètica i ritmes dels anys vuitanta.">Synthpop</option>
+                                    <option value="electropop" title="Vibració moderna que barreja bases de música electrònica amb estructures pop.">Electropop</option>
+                                    <option value="indie pop" title="Pop d'esperit independent, sovint amb instrumentació lleugera i un so menys polit.">Indie pop</option>
+                                    <option value="dream pop" title="Pop eteri i atmosfèric, inundat de reverberació i melodies suaus.">Dream pop</option>
+                                    <option value="art pop" title="Pop experimental i intel·lectual que explora estructures i temàtiques complexes.">Art pop</option>
+                                    <option value="dance-pop" title="Pop de ritme accelerat i enèrgic creat específicament per ballar.">Dance-pop</option>
+                                    <option value="hyperpop" title="Versió extremadament accelerada, exagerada i saturada d'efectes del pop modern.">Hyperpop</option>
+                                    <option value="k-pop" title="Música popular de Corea del Sud, altament produïda i amb barreges de gèneres.">K-pop</option>
+                                    <option value="j-pop" title="Música popular del Japó, amb progressions d'acords i estructures úniques.">J-pop</option>
+                                </optgroup>
+                                
+                                <optgroup label="Rock">
+                                    <option value="rock" title="Música d'energia forta guiada per guitarres elèctriques, baix i bateria acústica.">Rock</option>
+                                    <option value="alternative rock" title="Evolució del rock que s'allunya de les estructures comercials cercant un so propi.">Rock alternatiu</option>
+                                    <option value="indie rock" title="Rock independent amb varietat d'estils i una producció allunyada del so ràdiofònic.">Indie rock</option>
+                                    <option value="classic rock" title="So de rock tradicional i atemporal propi de les dècades dels seixanta i setanta.">Rock clàssic</option>
+                                    <option value="hard rock" title="Rock contundent amb guitarres distorsionades i veus plenes de potència.">Hard rock</option>
+                                    <option value="soft rock" title="Rock suau, harmònic i melòdic, centrat sovint en guitarres acústiques i pianos.">Soft rock</option>
+                                    <option value="punk rock" title="Música ràpida, crua, rebel i d'estructures molt senzilles i directes.">Punk rock</option>
+                                    <option value="pop punk" title="Barreja de l'energia i velocitat del punk amb harmonies vocals i melodies de pop.">Pop punk</option>
+                                    <option value="post-punk" title="Evolució del punk cap a territoris més foscos, atmosfèrics i experimentals.">Post-punk</option>
+                                    <option value="garage rock" title="Rock aspre i sense polir, simulant l'energia de grups assajant en un garatge.">Garage rock</option>
+                                    <option value="psychedelic rock" title="Rock experimental ple d'efectes creat per expandir l'experiència sensorial.">Rock psicodèlic</option>
+                                    <option value="progressive rock" title="Rock amb composicions èpiques complexes i elements de jazz o música clàssica.">Rock progressiu</option>
+                                    <option value="math rock" title="Rock tècnic basat en compassos asimètrics i estructures matemàtiques complexes.">Math rock</option>
+                                    <option value="shoegaze" title="Un dens mur de so format per guitarres ultra-distorsionades i veus enterrades en la mescla.">Shoegaze</option>
+                                    <option value="grunge" title="L'emblemàtic so de Seattle dels anys noranta barrejant la força del metal i el punk.">Grunge</option>
+                                    <option value="emo" title="Rock emocional, confessional i dinàmic amb lletres altament introspectives.">Emo</option>
+                                    <option value="post-rock" title="Rock majoritàriament instrumental enfocat a crear atmosferes sonores en lloc de cançons.">Post-rock</option>
+                                    <option value="glam rock" title="Rock teatral, grandiloqüent i enèrgic popularitzat durant la dècada dels setanta.">Glam rock</option>
+                                    <option value="folk rock" title="La instrumentació acústica del folk combinada amb la força de la secció rítmica del rock.">Folk rock</option>
+                                </optgroup>
+                                
+                                <optgroup label="Metal">
+                                    <option value="metal" title="Música extremadament pesant, contundent, amb baixos forts i guitarres saturades.">Metal</option>
+                                    <option value="heavy metal" title="L'estil fundacional, èpic i poderós del metal tradicional.">Heavy metal</option>
+                                    <option value="thrash metal" title="Metal de velocitat vertiginosa, riffs tècnics i agressivitat contundent.">Thrash metal</option>
+                                    <option value="death metal" title="Estil extrem que utilitza veus guturals baixes (growls) i guitarres de to molt greu.">Death metal</option>
+                                    <option value="black metal" title="Metal d'atmosfera molt fosca i crua, amb veus agudes esquinçades i guitarres tallants.">Black metal</option>
+                                    <option value="doom metal" title="Metal extremadament lent, pesant, opressiu i melancòlic.">Doom metal</option>
+                                    <option value="power metal" title="Metal altament melòdic, ràpid, grandiloqüent i sovint amb cors èpics.">Power metal</option>
+                                    <option value="symphonic metal" title="El pes del metal acompanyat de la grandiositat d'una orquestra o cors clàssics.">Metal simfònic</option>
+                                    <option value="progressive metal" title="Estructures molt llargues amb gran virtuosisme tècnic en tots els instruments.">Metal progressiu</option>
+                                    <option value="nu metal" title="Subgènere rítmic i contundent que fusiona metal amb elements de rap i electrònica.">Nu metal</option>
+                                    <option value="metalcore" title="Híbrid entre metal extrem i l'actitud i estructures del hardcore punk.">Metalcore</option>
+                                    <option value="deathcore" title="Fusió extremadament pesant de death metal i metalcore amb trencaments rítmics brutals.">Deathcore</option>
+                                    <option value="djent" title="Basat en l'ús rítmic complex de guitarres molt greus que sonen com cops metàllics.">Djent</option>
+                                    <option value="industrial metal" title="Metal fred i mecànic que incorpora sons de maquinària, programació i sintetitzadors.">Metal industrial</option>
+                                    <option value="gothic metal" title="Metal fosc de caire romàntic, a vegades acompanyat de pianos i veus de registre clàssic.">Metal gòtic</option>
+                                </optgroup>
+                                
+                                <optgroup label="Electronic / EDM">
+                                    <option value="electronic" title="Gènere lliure que utilitza principalment sintetitzadors, ordinadors i caixes de ritmes.">Electrònica</option>
+                                    <option value="EDM" title="Música electrònica de ball general, festiva i pròpia de grans festivals.">EDM</option>
+                                    <option value="house" title="Electrònica de ball clàssica caracteritzada pel seu ritme de bombo en 4/4.">House</option>
+                                    <option value="deep house" title="Variant suau, elegant i atmosfèrica del house, sovint amb influències de soul.">Deep house</option>
+                                    <option value="tech house" title="Un punt mitjà entre els ritmes del techno fred i l'harmonia càlida del house.">Tech house</option>
+                                    <option value="progressive house" title="Electrònica que evoluciona molt a poc a poc afegint capes de so cap a un clímax.">Progressive house</option>
+                                    <option value="electro house" title="House amb línies de baix distorsionades o molt presents.">Electro house</option>
+                                    <option value="future house" title="So electrònic de ball modern amb baixos vibrants de to molt metàl·lic i greu.">Future house</option>
+                                    <option value="tropical house" title="L'estil house més relaxant, sovint incorporant sons tropicals com pan flutes o marimbes.">Tropical house</option>
+                                    <option value="techno" title="Electrònica freda, mecànica, industrial i profundament repetitiva.">Techno</option>
+                                    <option value="minimal techno" title="Techno reduït a la mínima expressió, centrat purament en el ritme silenciós.">Minimal techno</option>
+                                    <option value="acid techno" title="Techno dominat pel peculiar i agut so seqüenciat del mític sintetitzador TB-303.">Acid techno</option>
+                                    <option value="trance" title="Electrònica molt ràpida amb arpegis llargs, melodies emotives i sensació hipnòtica.">Trance</option>
+                                    <option value="psytrance" title="La versió més accelerada, psicodèlica i tribal de la música trance.">Psytrance</option>
+                                    <option value="hard trance" title="Una adaptació més contundent i percussiva del so trance.">Hard trance</option>
+                                    <option value="drum and bass" title="Electrònica extremadament ràpida amb ritmes de bateria complexos (breaks) i baixos densos.">Drum and bass</option>
+                                    <option value="liquid drum and bass" title="La versió melòdica, relaxada i ambiental del ràpid drum and bass.">Liquid drum and bass</option>
+                                    <option value="jungle" title="El so predecessor basat intensament en la repetició i trossejat de mostres de percussió.">Jungle</option>
+                                    <option value="dubstep" title="Música amb ritmes ralentits a mig temps on tota l'atenció va a baixos gegantins i oscil·lants.">Dubstep</option>
+                                    <option value="brostep" title="Versió altament agressiva i estrident del dubstep modern.">Brostep</option>
+                                    <option value="future bass" title="Electrònica colorida impulsada per acords de sintetitzador eufòrics i lluminosos.">Future bass</option>
+                                    <option value="trap EDM" title="La unió entre ritmes greus del trap de carrer i sons de festival electrònic.">Trap EDM</option>
+                                    <option value="garage" title="So urbà britànic de ball amb ritmes que no cauen directament en el compàs estàndard.">Garage</option>
+                                    <option value="UK garage" title="Evolució pròpia del regne unit, amb veus retallades i bateries molt dinàmiques.">UK garage</option>
+                                    <option value="breakbeat" title="Estil de ball on la percussió fuig del 4/4 constant, optant per trencaments de bateria.">Breakbeat</option>
+                                    <option value="big beat" title="Barreja electritzant d'actitud de música rock, grans distorsions i ritmes trencats d'electrònica.">Big beat</option>
+                                    <option value="hardcore" title="L'extrem absolut de l'electrònica: velocitat extrema i ritmes totalment distorsionats.">Hardcore</option>
+                                    <option value="hardstyle" title="Electrònica dura caracteritzada per bombos enormement distorsionats i afavorits amb melodies èpiques.">Hardstyle</option>
+                                    <option value="gabber" title="El nivell més abrasiu i accelerat del so hardcore nascut a Holanda.">Gabber</option>
+                                    <option value="synthwave" title="Un exercici de nostàlgia pura inspirada en les pel·lícules de ciència-ficció i neó dels vuitanta.">Synthwave</option>
+                                    <option value="vaporwave" title="Art oníric d'internet creat alentint mostres de música comercial i corporativa d'antany.">Vaporwave</option>
+                                    <option value="chillwave" title="Produccions retro de baixa fidelitat creades principalment per inspirar relaxació estiuenca.">Chillwave</option>
+                                    <option value="downtempo" title="Terme ampli per a música electrònica de ritmes lents que no està dissenyada per ballar.">Downtempo</option>
+                                    <option value="ambient" title="Experiència immersiva sense ritmes on només s'escolten atmosferes sonores que flueixen.">Ambient</option>
+                                    <option value="IDM" title="Electrònica 'intel·ligent' plena de dissenys sonors complexos per a escolta cerebral, no per club.">IDM</option>
+                                    <option value="glitch" title="Música que genera bellesa a partir de talls intencionats, rascades de CD i errors de programari.">Glitch</option>
+                                    <option value="lo-fi" title="Gènere on petites imperfeccions gravades, com els vinils trencats o el soroll blanc, donen caràcter.">Lo-fi</option>
+                                    <option value="electro" title="Les arrels de la unió entre el hip hop primitiu i les seqüències electròniques retro.">Electro</option>
+                                    <option value="trip-hop" title="Electrònica sinistra, lenta i urbana, fusionant atmosferes amb baixos profunds inspirats en el hip hop.">Trip-hop</option>
+                                </optgroup>
+                                
+                                <optgroup label="Hip Hop & R&B">
+                                    <option value="hip hop" title="So tradicional fonamentat en samples, baixos forts i rimes rítmiques parlades (rap).">Hip hop</option>
+                                    <option value="rap" title="Estil on el cant vocal melòdic és substituït per versos d'estil lliure i rítmic.">Rap</option>
+                                    <option value="boom bap" title="So clàssic novaiorquès marcat per les contundents caixes de ritmes analògiques.">Boom bap</option>
+                                    <option value="trap" title="Estil sud-americà; tempos lents amb ràpids repics de xarleston i baixos 808 profunds.">Trap</option>
+                                    <option value="drill" title="Branca crua i fosca del trap amb una temàtica hostil i compassos asimètrics.">Drill</option>
+                                    <option value="cloud rap" title="Rimes pausades sobre atmosferes oníriques de teclat o sintetitzador eteri.">Cloud rap</option>
+                                    <option value="jazz rap" title="Mostreja estructures jazzístiques riques en acords per donar una base musical rica.">Jazz rap</option>
+                                    <option value="phonk" title="Rap on domina el greu extrem barrejat amb cowbells o sintetitzadors saturats.">Phonk</option>
+                                    <option value="soul" title="Música vocal emotiva inspirada en la tradició d'altars i devoció afroamericana.">Soul</option>
+                                    <option value="neo soul" title="Rhythm i Blues modern de producció urbana afavorint el to orgànic autèntic.">Neo soul</option>
+                                    <option value="funk" title="Protagonisme d'un baix intens o guitarra rítmica per portar tothom al groove.">Funk</option>
+                                    <option value="disco" title="Produccions simfòniques, orquestrades per a pista de ball amb tempo sostingut.">Disco</option>
+                                </optgroup>
+                                
+                                <optgroup label="Jazz & Blues">
+                                    <option value="jazz" title="Gènere basat en la improvisació, acords complexos i llibertat instrumental.">Jazz</option>
+                                    <option value="smooth jazz" title="Jazz de producció comercial assequible, relaxant i molt polit.">Smooth jazz</option>
+                                    <option value="bebop" title="Revolució frenètica del jazz amb tempos molt ràpids i virtuosisme extrem.">Bebop</option>
+                                    <option value="swing" title="Forma tradicional i altament ballable tocat per grans formacions.">Swing</option>
+                                    <option value="blues" title="Base musical de 12 compassos que expressa melancolia i sentiment profund.">Blues</option>
+                                    <option value="delta blues" title="L'estil primitiu, acústic i autèntic nascut al sud dels Estats Units.">Delta blues</option>
+                                    <option value="blues rock" title="La passió del blues barrejada amb la potència elèctrica del rock.">Blues rock</option>
+                                </optgroup>
+
+                                <optgroup label="Folk & Country">
+                                    <option value="folk" title="Música d'arrel acústica centrada en explicar històries a través de la lletra.">Folk</option>
+                                    <option value="indie folk" title="Visió moderna i alternativa de la música acústica d'autor.">Indie folk</option>
+                                    <option value="americana" title="Fusió de tradicions musicals nord-americanes com country, folk, i blues.">Americana</option>
+                                    <option value="country" title="Música rural amb guitarres, violins i pedal steel centrada en la vida quotidiana.">Country</option>
+                                    <option value="bluegrass" title="Estil ràpid i virtuós del country, basat exclusivament en instruments acústics.">Bluegrass</option>
+                                    <option value="singer-songwriter" title="Cançó d'autor on la veu i un instrument (guitarra/piano) són els únics protagonistes.">Cançó d'autor</option>
+                                </optgroup>
+
+                                <optgroup label="Classical & Cinematic">
+                                    <option value="classical" title="L'estil clàssic estàndard històric musical d'orquestra.">Clàssica</option>
+                                    <option value="baroque" title="Música recarregada, matemàtica i plena d'ornaments (ex. Bach).">Barroc</option>
+                                    <option value="modern classical" title="Instruments clàssics utilitzats amb tècniques i composicions d'avantguarda.">Clàssica moderna</option>
+                                    <option value="chamber music" title="Música clàssica íntima pensada per a un grup molt petit d'instruments.">Música de cambra</option>
+                                    <option value="orchestral" title="Composicions majestuoses per a grans conjunts simfònics.">Orquestral</option>
+                                    <option value="opera" title="Obra teatral on la història s'explica íntegrament a través del cant clàssic.">Òpera</option>
+                                    <option value="cinematic" title="Música grandiloqüent dissenyada per evocar imatges i donar suport a l'èpica visual.">Cinemàtica</option>
+                                    <option value="film score" title="Banda sonora instrumental dissenyada per acompanyar l'acció d'una pel·lícula.">Música de pel·lícula</option>
+                                </optgroup>
+
+                                <optgroup label="Latin, Reggae & World">
+                                    <option value="reggae" title="Ritme jamaicà pausat, sincopat i basat en el baix i els contratemps.">Reggae</option>
+                                    <option value="reggaeton" title="Fusió urbana de ritmes llatins i caribenys amb baixos electrònics forts.">Reggaeton</option>
+                                    <option value="salsa" title="Música de ball llatina complexa, plena de percussions i metalls.">Salsa</option>
+                                    <option value="flamenco" title="Art espanyol intens guiat per la guitarra espanyola, el 'cajón' i el cant profund.">Flamenc</option>
+                                    <option value="bossa nova" title="Música brasilera suau que fusiona la samba amb les harmonies riques del jazz.">Bossa nova</option>
+                                    <option value="afrobeat" title="Combinació de música tradicional africana amb jazz, highlife i funk.">Afrobeat</option>
+                                    <option value="celtic" title="Música tradicional del nord d'Europa amb gaites, flautes i violins ràpids.">Cèltica</option>
+                                </optgroup>
+
+                                <optgroup label="Altres (Experimental, Jocs, Ambient)">
+                                    <option value="experimental" title="Música que trenca regles i busca nous límits sonors.">Experimental</option>
+                                    <option value="gospel" title="Música espiritual afroamericana caracteritzada per cors multitudinaris i plens d'emoció.">Gospel</option>
+                                    <option value="video game music" title="Música pensada per acompanyar l'acció i la interactivitat dels videojocs.">Música de videojocs</option>
+                                    <option value="8-bit" title="Música retro que emula el so primitiu de les primeres consoles (NES, GameBoy).">8-bit</option>
+                                    <option value="meditation music" title="Atmosferes extremadament calmades dissenyades per ajudar a la relaxació mental.">Música de meditació</option>
+                                    <option value="podcast music" title="Música de fons subtil i rítmica que no interfereix amb la veu parlada.">Música de podcast</option>
+                                </optgroup>
+                            </select>
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-medium text-slate-700 mb-2" for="mood">2. Estat d'ànim (Mood) <span class="text-red-500">*</span></label>
+                            <select id="mood" onchange="generatePrompt()" class="w-full p-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-shadow text-slate-700 bg-white" required>
+                                <option value="" title="L'emoció principal que vols que transmeti la cançó.">Selecciona l'ambient...</option>
+                                
+                                <optgroup label="Positius, Alegres i Enèrgics">
+                                    <option value="carefree" title="Sona lleuger i lliure, sense preocupacions ni tensions.">Despreocupat</option>
+                                    <option value="fun" title="Estil lúdic, molt entretingut i dissenyat per fer somriure.">Divertit</option>
+                                    <option value="uplifting" title="Música que t'eleva l'ànim i et fa sentir millor.">Edificant</option>
+                                    <option value="empowering" title="Et fa sentir fort, invencible i ple de determinació.">Empoderador</option>
+                                    <option value="energetic" title="No para quiet, ple de ritme, força i moviment constant.">Enèrgic</option>
+                                    <option value="hopeful" title="Transmet llum i la sensació que les coses aniran bé.">Esperançador</option>
+                                    <option value="euphoric" title="Alegria portada a l'extrem, un esclat de felicitat màxima.">Eufòric</option>
+                                    <option value="happy" title="Simplement alegre, lluminós i positiu.">Feliç</option>
+                                    <option value="festive" title="Sona a celebració, festa i ambient de gaudi col·lectiu.">Festiu</option>
+                                    <option value="heroic" title="Propi d'un superheroi, inspira coratge i valentia.">Heròic</option>
+                                    <option value="inspirational" title="Música dissenyada per motivar i fer aflorar grans idees.">Inspirador</option>
+                                    <option value="playful" title="Trapella, simpàtic i amb un toc infantil o curiós.">Juguener</option>
+                                    <option value="magical" title="Sona com un conte de fades, ple de brillantors i fantasia.">Màgic</option>
+                                    <option value="triumphant" title="El so de la victòria, la conquesta i l'èxit absolut.">Triomfant</option>
+                                    <option value="upbeat" title="Ritme viu, ràpid i que incita a moure's amb alegria.">Animat</option>
+                                </optgroup>
+
+                                <optgroup label="Tristos i Malenconiosos">
+                                    <option value="bittersweet" title="Una barreja de tristesa amb petits tocs d'alegria o esperança.">Dolç i amarg</option>
+                                    <option value="fragile" title="So molt delicat, que sembla que s'hagi de trencar en qualsevol moment.">Fràgil</option>
+                                    <option value="cold" title="Sonoritats gelades, distants i sense gaire sentiment humà.">Fred</option>
+                                    <option value="melancholic" title="Tristesa profunda i reflexiva sobre allò que es va perdre.">Malenconiós</option>
+                                    <option value="nostalgic" title="Enyorança d'un temps passat que es recorda amb estima.">Nostàlgic</option>
+                                    <option value="lonely" title="Transmet una profunda sensació de soledat i aïllament.">Solitari</option>
+                                    <option value="sad" title="Emoció directa de pena, llàgrimes i dolor.">Trist</option>
+                                </optgroup>
+
+                                <optgroup label="Tranquils i Relaxants">
+                                    <option value="cozy" title="Sensació d'estar a casa, calent i protegit sota una manta.">Acollidor</option>
+                                    <option value="calm" title="Sense estridències, tot flueix amb serenitat absoluta.">Calmat</option>
+                                    <option value="soothing" title="Música que fa l'efecte d'una abraçada o un massatge sonor.">Calmós / Reconfortant</option>
+                                    <option value="ethereal" title="Lleuger com l'aire, com si no tingués pes ni forma física.">Eteri</option>
+                                    <option value="floating" title="Dona la sensació d'estar surant a l'espai o a l'aigua.">Flotant</option>
+                                    <option value="meditative" title="Ideal per tancar els ulls, respirar i meditar profundament.">Meditatiu</option>
+                                    <option value="relaxing" title="Baixa el teu ritme cardíac i elimina l'estrès del dia.">Relaxant</option>
+                                    <option value="serene" title="Tranquil·litat pura, com un llac sense cap onada.">Serè</option>
+                                    <option value="dreamy" title="Sona com un somni borrós i agradable, fora de la realitat.">Somiador</option>
+                                    <option value="smooth" title="Molt suau, sedós i sense cap tipus d'aresta o soroll brusc.">Suau</option>
+                                    <option value="laid-back" title="Actitud relaxada, com estar estirat al sofà sense pressa.">Tranquil</option>
+                                </optgroup>
+
+                                <optgroup label="Foscos, Tensos i Agressius">
+                                    <option value="aggressive" title="Violent, fort i directe a la cara. Sense miraments.">Agressiu</option>
+                                    <option value="apocalyptic" title="Sona a la fi del món, enormes proporcions de catàstrofe i foscor.">Apocalíptic</option>
+                                    <option value="anxious" title="Genera un sentiment de nerviosisme, pressa i incomoditat.">Anxiós</option>
+                                    <option value="chaotic" title="Desordenat intencionadament, sense estructura clara, tot col·lapsant.">Caòtic</option>
+                                    <option value="suspenseful" title="Et manté a la vora del seient, esperant que passi alguna cosa.">De suspens</option>
+                                    <option value="dramatic" title="Ple d'emocions fortes, canvis dràstics i teatralitat.">Dramàtic</option>
+                                    <option value="angry" title="Música feta des de la ràbia, l'odi o la frustració.">Enfurismat</option>
+                                    <option value="eerie" title="Esgarrifós i incòmode, com l'ambient d'una pel·lícula de terror.">Esgarrifós</option>
+                                    <option value="dark" title="Absència de llum musical, utilitzant tons greus i dissonàncies.">Fosc</option>
+                                    <option value="mysterious" title="Sona enigmàtic, amagant secrets darrere les notes.">Misteriós</option>
+                                    <option value="haunting" title="Una melodia que se't queda gravada al cap de forma inquietant.">Obsessiu / Inquietant</option>
+                                    <option value="rebellious" title="Antisistema, lluita contra les normes establertes.">Rebel</option>
+                                    <option value="tense" title="La corda està a punt de trencar-se; estrès harmònic constant.">Tens</option>
+                                    <option value="cinematic tension" title="La clàssica sensació de perill imminent abans que comenci l'acció.">Tensió cinemàtica</option>
+                                </optgroup>
+
+                                <optgroup label="Amor i Sensualitat">
+                                    <option value="passionate" title="Ple de foc i devoció, entregat completament al sentiment.">Apassionat</option>
+                                    <option value="romantic" title="Idealitzat, enamoradís i tendre, ple d'afecte.">Romàntic</option>
+                                    <option value="seductive" title="Suggerent, amb un ritme lent i cautivador que atrau.">Seductor</option>
+                                    <option value="sensual" title="Apel·la directament als sentits físics, tacte i proximitat.">Sensual</option>
+                                    <option value="sexy" title="Directe, atractiu i dissenyat per encendre l'ambient.">Sexy</option>
+                                    <option value="intimate" title="Molt proper, com si te'l cantessin a l'orella en una habitació buida.">Íntim</option>
+                                </optgroup>
+
+                                <optgroup label="Atmosfèrics i Conceptuals">
+                                    <option value="soulful" title="Interpretat des de l'ànima, amb sentiment pur i genuí.">Amb ànima</option>
+                                    <option value="gritty" title="Fregant l'aspror, no busca ser bonic sinó realista i brut.">Aspre</option>
+                                    <option value="atmospheric" title="El més important no és la melodia, sinó l'espai i el so de fons.">Atmosfèric</option>
+                                    <option value="epic" title="Gegantí, inabastable, preparat per a una gran batalla o viatge.">Èpic</option>
+                                    <option value="raw" title="Sense processament addicional, honest i completament despullat.">Cru</option>
+                                    <option value="cyberpunk" title="Barreja de foscor urbana i tecnologia del futur distòpic.">Cyberpunk</option>
+                                    <option value="spacey" title="Sons llargs i estranys que recorden el buit de l'espai exterior.">Espacial</option>
+                                    <option value="otherworldly" title="Ambients estranys, fora de qualsevol cosa pròpia del nostre món.">D'un altre món</option>
+                                    <option value="spiritual" title="Mística i elevadora, dissenyada per a l'ànima.">Espiritual</option>
+                                    <option value="futuristic" title="Ambients asèptics o ultramoderns, lligats a la visió del futur.">Futurista</option>
+                                    <option value="hypnotic" title="Patrons tan repetitius i fluids que fan entrar en un estat de trànsit.">Hipnòtic</option>
+                                    <option value="neon-lit" title="Tocs brillants, nocturns i sintetitzats que evoquen els neons urbans.">Il·luminat per neó</option>
+                                    <option value="immersive" title="Dissenyat per atrapar tota la teva atenció, com si fossis dins la cançó.">Immersiu</option>
+                                    <option value="introspective" title="Música dissenyada per mirar cap endins i reflexionar amb u mateix.">Introspectiu</option>
+                                    <option value="majestic" title="Amb un so noble, grandiós, bell i senyorial.">Majestuós</option>
+                                    <option value="maximalist" title="Tot passa alhora, sobrecarregat de pistes, ritmes i elements de fons.">Maximalista</option>
+                                    <option value="minimalistic" title="Buit, o gairebé buit, donant total llibertat als pocs elements actius.">Minimalista</option>
+                                    <option value="psychedelic" title="Sons que es dobleguen i alteren de maneres que confonen el cervell.">Psicodèlic</option>
+                                    <option value="reflective" title="Pensatiu, madur i assossegat.">Reflexiu</option>
+                                    <option value="surreal" title="Els elements sonors no es comporten d'una manera lògica ni previsible.">Surrealista</option>
+                                    <option value="transcendent" title="Cerca l'efecte que l'oient traspassi un estadi mental superior.">Transcendent</option>
+                                    <option value="thunderous" title="Amb una força i presència rítmica comparable al so d'una tempesta o trons.">Tronador</option>
+                                </optgroup>
+
+                                <optgroup label="Moments, Estils i Ambientacions">
+                                    <option value="summer-vibes" title="Evoca la platja, l'energia positiva i la llibertat associades a l'estiu.">Ambient d'estiu</option>
+                                    <option value="sun-soaked" title="So lluminós, càlid i obert, ideal per escoltar a ple dia.">Banyat pel sol</option>
+                                    <option value="emotional climax" title="El punt més alt d'expressió sentimental on tot s'allibera i explota.">Clímax emocional</option>
+                                    <option value="midnight-drive" title="Música ideal i monòtona de tempo mig perfecte per escoltar de fons conduint.">Conducció a mitjanit</option>
+                                    <option value="late-night" title="To suau, lligat sovint a l'alcohol i els recintes on ja queda poca gent.">De matinada</option>
+                                    <option value="emotional" title="Una exploració completament honesta de l'estat d'ànim del cantant o intèrpret.">Emocional</option>
+                                    <option value="enchanted" title="Sonoritats gairebé de fantasia, molt suaus i brillants d'arpes i espais clars.">Encantat</option>
+                                    <option value="sunrise-energy" title="A mesura que avança creix la força i brillantor com un nou inici que comença.">Energia d'alba</option>
+                                    <option value="funky" title="Els elements rítmics interactuen d'una manera molt rítmica.">Funky</option>
+                                    <option value="groovy" title="La presència contínua del baix convida contínuament a ballar amb ritme fluid.">Groovy</option>
+                                    <option value="wintery" title="Aïllament, textures oníriques com cristall o elements aguts i ressonants com el gel.">Hivernal</option>
+                                    <option value="emotional rollercoaster" title="Canvia el sentit dramàtic, pujant i baixant d'intensitat sobtadament durant el temps.">Muntanya russa emocional</option>
+                                    <option value="bittersweet nostalgia" title="El dolor dels temps bonics quan es troben profundament a faltar.">Nostàlgia agredolça</option>
+                                    <option value="dreamy nostalgia" title="Apropament somiador en què el passat es veu absolutament bonic i innocu.">Nostàlgia somiadora</option>
+                                    <option value="rainy-night" title="La quietud, el so dels elements que mullen o acompanyen instruments melancòlics.">Nit de pluja</option>
+                                    <option value="sunset-chill" title="Transicions i ritmes ideals per rebaixar tensions a les darreres hores de la jornada.">Relax de capvespre</option>
+                                    <option value="tribal" title="L'aparició massiva de percussions exòtiques a l'uníson i ritmes completament d'arrel.">Tribal</option>
+                                    <option value="underground" title="Dissonància o rebuig del concepte comercial del panorama musical actual.">Underground</option>
+                                    <option value="urban" title="Reflex de les condicions, argot, o dureses de viure en estructures metropolitanes.">Urbà</option>
+                                </optgroup>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <div>
+                            <label class="block text-sm font-medium text-slate-700 mb-2" for="tempo">3. Tempo / Ritme</label>
+                            <select id="tempo" onchange="generatePrompt()" class="w-full p-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-shadow text-slate-700 bg-white">
+                                <option value="">Que decideixi l'IA</option>
+                                <option value="slow tempo, downtempo">Lent (Downtempo)</option>
+                                <option value="mid-tempo">Mitjà (Mid-tempo)</option>
+                                <option value="fast tempo, upbeat">Ràpid (Upbeat)</option>
+                                <option value="very fast, high bpm">Molt Ràpid (High BPM)</option>
+                                <option value="variable tempo">Tempo Variable</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-slate-700 mb-2" for="keyNote">4. Tonalitat (Nota)</label>
+                            <select id="keyNote" onchange="generatePrompt()" class="w-full p-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-shadow text-slate-700 bg-white">
+                                <option value="">Que decideixi l'IA</option>
+                                <option value="C">C (Do)</option>
+                                <option value="C#">C# / Db</option>
+                                <option value="D">D (Re)</option>
+                                <option value="D#">D# / Eb</option>
+                                <option value="E">E (Mi)</option>
+                                <option value="F">F (Fa)</option>
+                                <option value="F#">F# / Gb</option>
+                                <option value="G">G (Sol)</option>
+                                <option value="G#">G# / Ab</option>
+                                <option value="A">A (La)</option>
+                                <option value="A#">A# / Bb</option>
+                                <option value="B">B (Si)</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-slate-700 mb-2" for="keyScale">5. Escala (Mode)</label>
+                            <select id="keyScale" onchange="generatePrompt()" class="w-full p-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-shadow text-slate-700 bg-white">
+                                <option value="">Que decideixi l'IA</option>
+                                <option value="Major">Major</option>
+                                <option value="Minor">Menor</option>
+                                <option value="Harmonic Minor">Menor Harmònica</option>
+                                <option value="Dorian">Dòrica</option>
+                                <option value="Mixolydian">Mixolídia</option>
+                                <option value="Phrygian">Frígia</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium text-slate-700 mb-2" for="vocals">6. Tipus de Veu i Cors</label>
+                        <select id="vocals" onchange="generatePrompt()" class="w-full p-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-shadow text-slate-700 bg-white">
+                            <option value="">Que decideixi l'IA</option>
+                            
+                            <optgroup label="Principal">
+                                <option value="instrumental">Instrumental (Sense veu)</option>
+                            </optgroup>
+
+                            <optgroup label="Gènere i Edat">
+                                <option value="female vocals">Veu Femenina</option>
+                                <option value="male vocals">Veu Masculina</option>
+                                <option value="androgynous vocals">Veu Andrògina</option>
+                                <option value="child vocals">Veu Infantil</option>
+                            </optgroup>
+
+                            <optgroup label="Formacions i Cors">
+                                <option value="duet vocals">Duet (Dues veus)</option>
+                                <option value="vocal harmonies">Harmonies Vocals</option>
+                                <option value="choir">Cor (General)</option>
+                                <option value="children choir">Cor Infantil</option>
+                                <option value="gospel choir">Cor Gospel</option>
+                                <option value="epic choir, gregorian chant">Cor Èpic / Cants Gregorians</option>
+                            </optgroup>
+
+                            <optgroup label="Estil i Tècnica Principal">
+                                <option value="clean vocals">Cant Net / Melòdic</option>
+                                <option value="rap vocals">Rap / Hip Hop</option>
+                                <option value="spoken word">Paraula Parlada / Poesia</option>
+                                <option value="soulful vocals">Veu amb Ànima (Soul / R&B)</option>
+                                <option value="opera vocals">Cant d'Òpera</option>
+                                <option value="theatrical vocals">Cant Teatral / Cabaret</option>
+                                <option value="throat singing">Cant de Gola (Obertònic)</option>
+                            </optgroup>
+
+                            <optgroup label="Textura i To">
+                                <option value="husky vocals, raspy vocals">Veu Esquinçada / Rasposa</option>
+                                <option value="deep vocals, bass vocals">Veu Profunda / Greu</option>
+                                <option value="high-pitched vocals, falsetto">Veu Aguda / Falset</option>
+                                <option value="whisper vocals">Veu Xiuxiuejada</option>
+                                <option value="breathy vocals, ethereal vocals">Veu Aèria / Etèria</option>
+                                <option value="screaming vocals, growl">Veus Guturals / Screaming</option>
+                            </optgroup>
+
+                            <optgroup label="Efectes i Processament">
+                                <option value="robotic vocals, vocoder">Veu Robòtica (Vocoder)</option>
+                                <option value="autotuned vocals">Veu amb Autotune</option>
+                                <option value="distorted vocals, megaphone">Veu Distorsionada / Efecte Megàfon</option>
+                                <option value="vocal chops">Talls Vocals (Vocal Chops)</option>
+                                <option value="vocaloid, anime vocals">Veu Vocaloid / Estil Anime</option>
+                            </optgroup>
+                        </select>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium text-slate-700 mb-2" for="instruments">7. Instruments Principals (Opcional)</label>
+                        <div class="relative">
+                            <input type="text" id="instruments" oninput="debouncedGenerate()" class="w-full p-3 pr-10 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all mb-2" placeholder="Escriu o selecciona...">
+                            <button type="button" onclick="clearInput('instruments')" class="absolute right-3 top-3 text-slate-400 hover:text-red-500 transition-colors focus:outline-none" title="Netejar instruments">
+                                <i class="fa-solid fa-xmark text-lg"></i>
+                            </button>
+                        </div>
+                        
+                        <div class="mt-2 space-y-2">
+                            <!-- Cordes -->
+                            <details class="bg-white border border-slate-200 rounded-lg group">
+                                <summary class="px-3 py-2 font-medium text-sm text-slate-700 cursor-pointer select-none flex justify-between items-center hover:bg-slate-50 transition-colors rounded-lg">
+                                    <span><i class="fa-solid fa-guitar text-amber-600 mr-2"></i> Cordes (Strings & Plucked)</span>
+                                    <i class="fa-solid fa-chevron-down text-slate-400 group-open:rotate-180 transition-transform text-xs"></i>
+                                </summary>
+                                <div class="px-3 pb-3 pt-2 flex flex-wrap gap-1.5 border-t border-slate-100 mt-1 max-h-48 overflow-y-auto">
+                                    <span class="chip" onclick="toggleTag(this, 'instruments', 'acoustic guitar')">Guitarra acústica</span>
+                                    <span class="chip" onclick="toggleTag(this, 'instruments', 'balalaika')">Balalaica</span>
+                                    <span class="chip" onclick="toggleTag(this, 'instruments', 'banjo')">Banjo</span>
+                                    <span class="chip" onclick="toggleTag(this, 'instruments', 'bass guitar')">Baix elèctric</span>
+                                    <span class="chip" onclick="toggleTag(this, 'instruments', 'bouzouki')">Bouzouki</span>
+                                    <span class="chip" onclick="toggleTag(this, 'instruments', 'cello')">Violoncel</span>
+                                    <span class="chip" onclick="toggleTag(this, 'instruments', 'double bass')">Contrabaix</span>
+                                    <span class="chip" onclick="toggleTag(this, 'instruments', 'electric guitar')">Guitarra elèctrica</span>
+                                    <span class="chip" onclick="toggleTag(this, 'instruments', 'erhu')">Erhu</span>
+                                    <span class="chip" onclick="toggleTag(this, 'instruments', 'fretless bass')">Baix fretless</span>
+                                    <span class="chip" onclick="toggleTag(this, 'instruments', 'guzheng')">Guzheng</span>
+                                    <span class="chip" onclick="toggleTag(this, 'instruments', 'harp')">Arpa</span>
+                                    <span class="chip" onclick="toggleTag(this, 'instruments', 'koto')">Koto</span>
+                                    <span class="chip" onclick="toggleTag(this, 'instruments', 'lute')">Llaüt</span>
+                                    <span class="chip" onclick="toggleTag(this, 'instruments', 'lyre')">Lira</span>
+                                    <span class="chip" onclick="toggleTag(this, 'instruments', 'mandolin')">Mandolina</span>
+                                    <span class="chip" onclick="toggleTag(this, 'instruments', 'oud')">Oud</span>
+                                    <span class="chip" onclick="toggleTag(this, 'instruments', 'shamisen')">Shamisen</span>
+                                    <span class="chip" onclick="toggleTag(this, 'instruments', 'sitar')">Sitar</span>
+                                    <span class="chip" onclick="toggleTag(this, 'instruments', 'slap bass')">Baix slap</span>
+                                    <span class="chip" onclick="toggleTag(this, 'instruments', 'ukulele')">Ukelele</span>
+                                    <span class="chip" onclick="toggleTag(this, 'instruments', 'upright bass')">Contrabaix acústic</span>
+                                    <span class="chip" onclick="toggleTag(this, 'instruments', 'viola')">Viola</span>
+                                    <span class="chip" onclick="toggleTag(this, 'instruments', 'violin')">Violí</span>
+                                    <span class="chip" onclick="toggleTag(this, 'instruments', 'zither')">Cítara</span>
+                                </div>
+                            </details>
+
+                            <!-- Teclats i Pianos -->
+                            <details class="bg-white border border-slate-200 rounded-lg group">
+                                <summary class="px-3 py-2 font-medium text-sm text-slate-700 cursor-pointer select-none flex justify-between items-center hover:bg-slate-50 transition-colors rounded-lg">
+                                    <span><i class="fa-solid fa-keyboard text-slate-800 mr-2"></i> Teclats i Pianos</span>
+                                    <i class="fa-solid fa-chevron-down text-slate-400 group-open:rotate-180 transition-transform text-xs"></i>
+                                </summary>
+                                <div class="px-3 pb-3 pt-2 flex flex-wrap gap-1.5 border-t border-slate-100 mt-1 max-h-48 overflow-y-auto">
+                                    <span class="chip" onclick="toggleTag(this, 'instruments', 'accordion')">Acordió</span>
+                                    <span class="chip" onclick="toggleTag(this, 'instruments', 'celesta')">Celesta</span>
+                                    <span class="chip" onclick="toggleTag(this, 'instruments', 'church organ')">Orgue d'església</span>
+                                    <span class="chip" onclick="toggleTag(this, 'instruments', 'clavinet')">Clavinet</span>
+                                    <span class="chip" onclick="toggleTag(this, 'instruments', 'electric piano')">Piano elèctric</span>
+                                    <span class="chip" onclick="toggleTag(this, 'instruments', 'grand piano')">Piano de cua</span>
+                                    <span class="chip" onclick="toggleTag(this, 'instruments', 'Hammond organ')">Orgue Hammond</span>
+                                    <span class="chip" onclick="toggleTag(this, 'instruments', 'harpsichord')">Clavecí</span>
+                                    <span class="chip" onclick="toggleTag(this, 'instruments', 'mellotron')">Mellotron</span>
+                                    <span class="chip" onclick="toggleTag(this, 'instruments', 'music box')">Caixa de música</span>
+                                    <span class="chip" onclick="toggleTag(this, 'instruments', 'organ')">Orgue</span>
+                                    <span class="chip" onclick="toggleTag(this, 'instruments', 'piano')">Piano</span>
+                                    <span class="chip" onclick="toggleTag(this, 'instruments', 'pipe organ')">Orgue de tubs</span>
+                                    <span class="chip" onclick="toggleTag(this, 'instruments', 'Rhodes piano')">Piano Rhodes</span>
+                                </div>
+                            </details>
+
+                            <!-- Sintetitzadors i Electrònica -->
+                            <details class="bg-white border border-slate-200 rounded-lg group">
+                                <summary class="px-3 py-2 font-medium text-sm text-slate-700 cursor-pointer select-none flex justify-between items-center hover:bg-slate-50 transition-colors rounded-lg">
+                                    <span><i class="fa-solid fa-wave-square text-fuchsia-500 mr-2"></i> Sintetitzadors i FX</span>
+                                    <i class="fa-solid fa-chevron-down text-slate-400 group-open:rotate-180 transition-transform text-xs"></i>
+                                </summary>
+                                <div class="px-3 pb-3 pt-2 flex flex-wrap gap-1.5 border-t border-slate-100 mt-1 max-h-48 overflow-y-auto">
+                                    <span class="chip" onclick="toggleTag(this, 'instruments', 'ambient textures')">Textures ambientals</span>
+                                    <span class="chip" onclick="toggleTag(this, 'instruments', 'analog synth')">Sintetitzador analògic</span>
+                                    <span class="chip" onclick="toggleTag(this, 'instruments', 'arpeggiator')">Arpegiador</span>
+                                    <span class="chip" onclick="toggleTag(this, 'instruments', 'digital synth')">Sintetitzador digital</span>
+                                    <span class="chip" onclick="toggleTag(this, 'instruments', 'distorted bass')">Baix distorsionat</span>
+                                    <span class="chip" onclick="toggleTag(this, 'instruments', 'field recordings')">Gravacions de camp</span>
+                                    <span class="chip" onclick="toggleTag(this, 'instruments', 'foley percussion')">Percussió Foley</span>
+                                    <span class="chip" onclick="toggleTag(this, 'instruments', 'glitch effects')">Efectes glitch</span>
+                                    <span class="chip" onclick="toggleTag(this, 'instruments', 'impacts')">Impactes</span>
+                                    <span class="chip" onclick="toggleTag(this, 'instruments', 'lead synth')">Sintetitzador solista</span>
+                                    <span class="chip" onclick="toggleTag(this, 'instruments', 'modular synth')">Sintetitzador modular</span>
+                                    <span class="chip" onclick="toggleTag(this, 'instruments', 'nature sounds')">Sons de la natura</span>
+                                    <span class="chip" onclick="toggleTag(this, 'instruments', 'pad synth')">Pad de sintetitzador</span>
+                                    <span class="chip" onclick="toggleTag(this, 'instruments', 'risers')">Risers (Pujades)</span>
+                                    <span class="chip" onclick="toggleTag(this, 'instruments', 'sub bass')">Sub-baix</span>
+                                    <span class="chip" onclick="toggleTag(this, 'instruments', 'synth bass')">Baix de sintetitzador</span>
+                                    <span class="chip" onclick="toggleTag(this, 'instruments', 'synthesizer')">Sintetitzador general</span>
+                                    <span class="chip" onclick="toggleTag(this, 'instruments', 'talkbox')">Talkbox</span>
+                                    <span class="chip" onclick="toggleTag(this, 'instruments', 'tape hiss')">Soroll de cinta</span>
+                                    <span class="chip" onclick="toggleTag(this, 'instruments', 'theremin')">Theremin</span>
+                                    <span class="chip" onclick="toggleTag(this, 'instruments', 'vinyl crackle')">Crepitar de vinil</span>
+                                    <span class="chip" onclick="toggleTag(this, 'instruments', 'vocoder')">Vocoder</span>
+                                </div>
+                            </details>
+
+                            <!-- Vent i Metall -->
+                            <details class="bg-white border border-slate-200 rounded-lg group">
+                                <summary class="px-3 py-2 font-medium text-sm text-slate-700 cursor-pointer select-none flex justify-between items-center hover:bg-slate-50 transition-colors rounded-lg">
+                                    <span><i class="fa-solid fa-wind text-teal-600 mr-2"></i> Vent i Metall</span>
+                                    <i class="fa-solid fa-chevron-down text-slate-400 group-open:rotate-180 transition-transform text-xs"></i>
+                                </summary>
+                                <div class="px-3 pb-3 pt-2 flex flex-wrap gap-1.5 border-t border-slate-100 mt-1 max-h-48 overflow-y-auto">
+                                    <span class="chip" onclick="toggleTag(this, 'instruments', 'bagpipes')">Gaita</span>
+                                    <span class="chip" onclick="toggleTag(this, 'instruments', 'bassoon')">Fagot</span>
+                                    <span class="chip" onclick="toggleTag(this, 'instruments', 'brass section')">Secció de metalls</span>
+                                    <span class="chip" onclick="toggleTag(this, 'instruments', 'clarinet')">Clarinet</span>
+                                    <span class="chip" onclick="toggleTag(this, 'instruments', 'didgeridoo')">Didgeridoo</span>
+                                    <span class="chip" onclick="toggleTag(this, 'instruments', 'flute')">Flauta</span>
+                                    <span class="chip" onclick="toggleTag(this, 'instruments', 'French horn')">Trompa</span>
+                                    <span class="chip" onclick="toggleTag(this, 'instruments', 'harmonica')">Harmònica</span>
+                                    <span class="chip" onclick="toggleTag(this, 'instruments', 'ney flute')">Flauta Ney</span>
+                                    <span class="chip" onclick="toggleTag(this, 'instruments', 'oboe')">Oboè</span>
+                                    <span class="chip" onclick="toggleTag(this, 'instruments', 'pan flute')">Flauta de Pan</span>
+                                    <span class="chip" onclick="toggleTag(this, 'instruments', 'piccolo')">Flautí</span>
+                                    <span class="chip" onclick="toggleTag(this, 'instruments', 'recorder')">Flauta dolça</span>
+                                    <span class="chip" onclick="toggleTag(this, 'instruments', 'saxophone')">Saxòfon</span>
+                                    <span class="chip" onclick="toggleTag(this, 'instruments', 'trombone')">Trombó</span>
+                                    <span class="chip" onclick="toggleTag(this, 'instruments', 'trumpet')">Trompeta</span>
+                                    <span class="chip" onclick="toggleTag(this, 'instruments', 'tuba')">Tuba</span>
+                                    <span class="chip" onclick="toggleTag(this, 'instruments', 'uilleann pipes')">Gaita irlandesa</span>
+                                </div>
+                            </details>
+
+                            <!-- Percussió i Bateria -->
+                            <details class="bg-white border border-slate-200 rounded-lg group">
+                                <summary class="px-3 py-2 font-medium text-sm text-slate-700 cursor-pointer select-none flex justify-between items-center hover:bg-slate-50 transition-colors rounded-lg">
+                                    <span><i class="fa-solid fa-drum text-red-500 mr-2"></i> Percussió i Bateria</span>
+                                    <i class="fa-solid fa-chevron-down text-slate-400 group-open:rotate-180 transition-transform text-xs"></i>
+                                </summary>
+                                <div class="px-3 pb-3 pt-2 flex flex-wrap gap-1.5 border-t border-slate-100 mt-1 max-h-48 overflow-y-auto">
+                                    <span class="chip" onclick="toggleTag(this, 'instruments', '808 drums')">Bateria 808</span>
+                                    <span class="chip" onclick="toggleTag(this, 'instruments', 'acoustic drums')">Bateria acústica</span>
+                                    <span class="chip" onclick="toggleTag(this, 'instruments', 'bongos')">Bongos</span>
+                                    <span class="chip" onclick="toggleTag(this, 'instruments', 'breakbeat drums')">Bateria breakbeat</span>
+                                    <span class="chip" onclick="toggleTag(this, 'instruments', 'cajón')">Calaix flamenc</span>
+                                    <span class="chip" onclick="toggleTag(this, 'instruments', 'cinematic percussion')">Percussió cinemàtica</span>
+                                    <span class="chip" onclick="toggleTag(this, 'instruments', 'congas')">Congues</span>
+                                    <span class="chip" onclick="toggleTag(this, 'instruments', 'cowbell')">Esquellot</span>
+                                    <span class="chip" onclick="toggleTag(this, 'instruments', 'cymbals')">Plats</span>
+                                    <span class="chip" onclick="toggleTag(this, 'instruments', 'djembe')">Djembe</span>
+                                    <span class="chip" onclick="toggleTag(this, 'instruments', 'drum kit')">Bateria completa</span>
+                                    <span class="chip" onclick="toggleTag(this, 'instruments', 'electronic drums')">Bateria electrònica</span>
+                                    <span class="chip" onclick="toggleTag(this, 'instruments', 'gamelan')">Gamelan</span>
+                                    <span class="chip" onclick="toggleTag(this, 'instruments', 'glockenspiel')">Glockenspiel</span>
+                                    <span class="chip" onclick="toggleTag(this, 'instruments', 'handpan')">Handpan</span>
+                                    <span class="chip" onclick="toggleTag(this, 'instruments', 'hardstyle kick')">Bombo hardstyle</span>
+                                    <span class="chip" onclick="toggleTag(this, 'instruments', 'hi-hats')">Xarleston (Hi-hats)</span>
+                                    <span class="chip" onclick="toggleTag(this, 'instruments', 'kalimba')">Kalimba</span>
+                                    <span class="chip" onclick="toggleTag(this, 'instruments', 'kick drum')">Bombo</span>
+                                    <span class="chip" onclick="toggleTag(this, 'instruments', 'maracas')">Maraques</span>
+                                    <span class="chip" onclick="toggleTag(this, 'instruments', 'marimba')">Marimba</span>
+                                    <span class="chip" onclick="toggleTag(this, 'instruments', 'mbira')">Mbira</span>
+                                    <span class="chip" onclick="toggleTag(this, 'instruments', 'shaker')">Shaker</span>
+                                    <span class="chip" onclick="toggleTag(this, 'instruments', 'snare')">Caixa (Snare)</span>
+                                    <span class="chip" onclick="toggleTag(this, 'instruments', 'steel drums')">Tambors d'acer</span>
+                                    <span class="chip" onclick="toggleTag(this, 'instruments', 'tabla')">Tabla</span>
+                                    <span class="chip" onclick="toggleTag(this, 'instruments', 'taiko drums')">Tambors Taiko</span>
+                                    <span class="chip" onclick="toggleTag(this, 'instruments', 'tambourine')">Pandereta</span>
+                                    <span class="chip" onclick="toggleTag(this, 'instruments', 'timbales')">Timbales</span>
+                                    <span class="chip" onclick="toggleTag(this, 'instruments', 'toms')">Toms</span>
+                                    <span class="chip" onclick="toggleTag(this, 'instruments', 'trap hats')">Hi-hats de trap</span>
+                                    <span class="chip" onclick="toggleTag(this, 'instruments', 'tubular bells')">Campanes tubulars</span>
+                                    <span class="chip" onclick="toggleTag(this, 'instruments', 'vibraphone')">Vibràfon</span>
+                                    <span class="chip" onclick="toggleTag(this, 'instruments', 'xylophone')">Xilòfon</span>
+                                </div>
+                            </details>
+
+                            <!-- Veus addicionals i Cors -->
+                            <details class="bg-white border border-slate-200 rounded-lg group">
+                                <summary class="px-3 py-2 font-medium text-sm text-slate-700 cursor-pointer select-none flex justify-between items-center hover:bg-slate-50 transition-colors rounded-lg">
+                                    <span><i class="fa-solid fa-microphone text-pink-500 mr-2"></i> Veus addicionals i Cors</span>
+                                    <i class="fa-solid fa-chevron-down text-slate-400 group-open:rotate-180 transition-transform text-xs"></i>
+                                </summary>
+                                <div class="px-3 pb-3 pt-2 flex flex-wrap gap-1.5 border-t border-slate-100 mt-1 max-h-48 overflow-y-auto">
+                                    <span class="chip" onclick="toggleTag(this, 'instruments', 'beatbox')">Beatbox</span>
+                                    <span class="chip" onclick="toggleTag(this, 'instruments', 'child vocals')">Veus infantils</span>
+                                    <span class="chip" onclick="toggleTag(this, 'instruments', 'children choir')">Cor infantil</span>
+                                    <span class="chip" onclick="toggleTag(this, 'instruments', 'choir')">Cor general</span>
+                                    <span class="chip" onclick="toggleTag(this, 'instruments', 'female vocals')">Veus femenines</span>
+                                    <span class="chip" onclick="toggleTag(this, 'instruments', 'gospel choir')">Cor gospel</span>
+                                    <span class="chip" onclick="toggleTag(this, 'instruments', 'male vocals')">Veus masculines</span>
+                                    <span class="chip" onclick="toggleTag(this, 'instruments', 'opera vocals')">Veus d'òpera</span>
+                                    <span class="chip" onclick="toggleTag(this, 'instruments', 'rap vocals')">Veus de rap</span>
+                                    <span class="chip" onclick="toggleTag(this, 'instruments', 'spoken word')">Paraula parlada</span>
+                                    <span class="chip" onclick="toggleTag(this, 'instruments', 'vocal chops')">Talls vocals (Vocal chops)</span>
+                                    <span class="chip" onclick="toggleTag(this, 'instruments', 'whisper vocals')">Veus xiuxiuejades</span>
+                                </div>
+                            </details>
+
+                            <!-- Agrupacions i Orquestra -->
+                            <details class="bg-white border border-slate-200 rounded-lg group">
+                                <summary class="px-3 py-2 font-medium text-sm text-slate-700 cursor-pointer select-none flex justify-between items-center hover:bg-slate-50 transition-colors rounded-lg">
+                                    <span><i class="fa-solid fa-users text-indigo-500 mr-2"></i> Agrupacions i Orquestra</span>
+                                    <i class="fa-solid fa-chevron-down text-slate-400 group-open:rotate-180 transition-transform text-xs"></i>
+                                </summary>
+                                <div class="px-3 pb-3 pt-2 flex flex-wrap gap-1.5 border-t border-slate-100 mt-1 max-h-48 overflow-y-auto">
+                                    <span class="chip" onclick="toggleTag(this, 'instruments', 'acoustic ensemble')">Conjunt acústic</span>
+                                    <span class="chip" onclick="toggleTag(this, 'instruments', 'chamber orchestra')">Orquestra de cambra</span>
+                                    <span class="chip" onclick="toggleTag(this, 'instruments', 'full orchestra')">Orquestra completa</span>
+                                    <span class="chip" onclick="toggleTag(this, 'instruments', 'jazz trio')">Trio de jazz</span>
+                                    <span class="chip" onclick="toggleTag(this, 'instruments', 'marching band')">Banda de música</span>
+                                    <span class="chip" onclick="toggleTag(this, 'instruments', 'orchestra')">Orquestra</span>
+                                    <span class="chip" onclick="toggleTag(this, 'instruments', 'orchestral hits')">Cops orquestrals</span>
+                                    <span class="chip" onclick="toggleTag(this, 'instruments', 'string ensemble')">Conjunt de corda</span>
+                                    <span class="chip" onclick="toggleTag(this, 'instruments', 'string quartet')">Quartet de corda</span>
+                                </div>
+                            </details>
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium text-slate-700 mb-2" for="extra">8. Detalls Extra de Producció i Estil (Opcional)</label>
+                        <div class="relative">
+                            <textarea id="extra" rows="2" oninput="debouncedGenerate()" class="w-full p-3 pr-10 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all resize-none mb-2" placeholder="Escriu detalls o selecciona de les categories inferiors..."></textarea>
+                            <button type="button" onclick="clearInput('extra')" class="absolute right-3 top-3 text-slate-400 hover:text-red-500 transition-colors focus:outline-none" title="Netejar detalls">
+                                <i class="fa-solid fa-xmark text-lg"></i>
+                            </button>
+                        </div>
+                        
+                        <div class="mt-2 space-y-2">
+                            <!-- Tècniques i Textures Generals -->
+                            <details class="bg-white border border-slate-200 rounded-lg group">
+                                <summary class="px-4 py-2.5 font-medium text-sm text-slate-700 cursor-pointer select-none flex justify-between items-center hover:bg-slate-50 transition-colors rounded-lg">
+                                    <span><i class="fa-solid fa-layer-group text-blue-500 mr-2"></i> Tècniques i Textures (General)</span>
+                                    <i class="fa-solid fa-chevron-down text-slate-400 group-open:rotate-180 transition-transform text-xs"></i>
+                                </summary>
+                                <div class="px-4 pb-3 pt-2 flex flex-wrap gap-1.5 border-t border-slate-100 mt-1 max-h-60 overflow-y-auto">
+                                    <span class="chip" title="Crea una atmosfera envoltant i relaxant, generalment sense un ritme de percussió marcat." onclick="toggleTag(this, 'extra', 'ambient')">Ambient</span>
+                                    <span class="chip" title="Aporta la calidesa i les imperfeccions característiques dels equips electrònics clàssics." onclick="toggleTag(this, 'extra', 'analog')">Analògic</span>
+                                    <span class="chip" title="Dona sensació de grandesa i espai, utilitzant reverberacions i ecos llargs." onclick="toggleTag(this, 'extra', 'atmospheric')">Atmosfèric</span>
+                                    <span class="chip" title="Experimenta fora de les normes musicals convencionals, buscant sons trencadors." onclick="toggleTag(this, 'extra', 'avant-garde')">Avantguardista</span>
+                                    <span class="chip" title="Realça les freqüències baixes perquè el ritme i el baix tinguin molta presència." onclick="toggleTag(this, 'extra', 'bass-heavy')">Molts greus (Bass-heavy)</span>
+                                    <span class="chip" title="Dona un protagonisme absolut a la base rítmica i a la percussió." onclick="toggleTag(this, 'extra', 'beat-driven')">Marcat pel ritme</span>
+                                    <span class="chip" title="So èpic i majestuós, propi de les bandes sonores de grans pel·lícules." onclick="toggleTag(this, 'extra', 'cinematic')">Cinemàtic</span>
+                                    <span class="chip" title="Proporciona un so cristal·lí on cada instrument s'escolta de forma clara i separada." onclick="toggleTag(this, 'extra', 'clean mix')">Mescla neta</span>
+                                    <span class="chip" title="Redueix la diferència de volum entre les parts fortes i fluixes, donant un so més compacte." onclick="toggleTag(this, 'extra', 'compressed')">Comprimit</span>
+                                    <span class="chip" title="Transmet misteri, tensió o melancolia mitjançant tons greus i acords menors." onclick="toggleTag(this, 'extra', 'dark')">Fosc</span>
+                                    <span class="chip" title="So immersiu amb molta presència de freqüències baixes i reverberacions." onclick="toggleTag(this, 'extra', 'deep')">Profund</span>
+                                    <span class="chip" title="Afegeix saturació intencionada, creant un so agressiu, aspre o trencat." onclick="toggleTag(this, 'extra', 'distorted')">Distorsionat</span>
+                                    <span class="chip" title="Ritme lent i relaxat, ideal per a ambients tranquils o música chill-out." onclick="toggleTag(this, 'extra', 'downtempo')">Downtempo</span>
+                                    <span class="chip" title="Crea una sensació irreal i etèria, com si s'estigués en un somni." onclick="toggleTag(this, 'extra', 'dreamy')">Somiador</span>
+                                    <span class="chip" title="S'eliminen els ecos i les reverberacions, aconseguint un so molt proper i íntim." onclick="toggleTag(this, 'extra', 'dry mix')">Mescla seca</span>
+                                    <span class="chip" title="Manté una gran diferència de volum entre els moments tranquils i els d'alta intensitat." onclick="toggleTag(this, 'extra', 'dynamic')">Dinàmic</span>
+                                    <span class="chip" title="Busca textures i estructures poc comunes, fugint d'allò comercial." onclick="toggleTag(this, 'extra', 'experimental')">Experimental</span>
+                                    <span class="chip" title="Proporciona un baix molt rodó, amb pes i contundència." onclick="toggleTag(this, 'extra', 'fat bass')">Baix gruixut (Fat bass)</span>
+                                    <span class="chip" title="Utilitza sons sintètics moderns que evoquen tecnologia i futur." onclick="toggleTag(this, 'extra', 'futuristic')">Futurista</span>
+                                    <span class="chip" title="Inclou talls, salts i errors digitals intencionats per crear ritmes complexos." onclick="toggleTag(this, 'extra', 'glitch')">Glitch</span>
+                                    <span class="chip" title="Té un ritme molt contagiós i rítmic que convida al moviment." onclick="toggleTag(this, 'extra', 'groovy')">Groovy</span>
+                                    <span class="chip" title="So cru i sense polir, amb textura, soroll de fons o lleugera distorsió." onclick="toggleTag(this, 'extra', 'gritty')">Aspre</span>
+                                    <span class="chip" title="Dona molta importància a les melodies, els acords i els acompanyaments." onclick="toggleTag(this, 'extra', 'harmonic')">Harmònic</span>
+                                    <span class="chip" title="Transmet molta intensitat, ritme i potència des del primer segon." onclick="toggleTag(this, 'extra', 'high-energy')">Alta energia</span>
+                                    <span class="chip" title="Crea un paisatge sonor tridimensional que envolta completament qui l'escolta." onclick="toggleTag(this, 'extra', 'immersive')">Immersiu</span>
+                                    <span class="chip" title="Utilitza sons metàl·lics, mecànics i aspres, propis de fàbriques o maquinària." onclick="toggleTag(this, 'extra', 'industrial')">Industrial</span>
+                                    <span class="chip" title="Garanteix que la peça es basi exclusivament en els instruments, sense veu." onclick="toggleTag(this, 'extra', 'instrumental')">Instrumental</span>
+                                    <span class="chip" title="Suma multitud de sons i instruments sonant alhora per crear un mur de so." onclick="toggleTag(this, 'extra', 'layered')">Amb capes</span>
+                                    <span class="chip" title="Emula el so natural i les petites imperfeccions d'un concert en viu." onclick="toggleTag(this, 'extra', 'live-recorded')">Gravat en directe</span>
+                                    <span class="chip" title="Busca una qualitat intencionada de baixa fidelitat, amb un to nostàlgic." onclick="toggleTag(this, 'extra', 'lo-fi')">Lo-fi</span>
+                                    <span class="chip" title="Proporciona un so ric, ple de detalls, harmònics i agradable a l'oïda." onclick="toggleTag(this, 'extra', 'lush')">Exuberant</span>
+                                    <span class="chip" title="Evoca emocions profundes i records mitjançant acords tristos i ritmes pausats." onclick="toggleTag(this, 'extra', 'melancholic')">Malenconiós</span>
+                                    <span class="chip" title="La melodia principal és la clara protagonista i fil conductor del tema." onclick="toggleTag(this, 'extra', 'melodic')">Melòdic</span>
+                                    <span class="chip" title="Utilitza els elements mínims necessaris, deixant molt espai i silenci." onclick="toggleTag(this, 'extra', 'minimal')">Minimal</span>
+                                    <span class="chip" title="Aplica tècniques de producció i masterització pròpies de les llistes d'èxits actuals." onclick="toggleTag(this, 'extra', 'modern')">Modern</span>
+                                    <span class="chip" title="Crea una atmosfera canviant, introspectiva i carregada de sentiments." onclick="toggleTag(this, 'extra', 'moody')">Moody (Emocional)</span>
+                                    <span class="chip" title="Incorpora elements de soroll blanc o distorsió ràdio de manera artística." onclick="toggleTag(this, 'extra', 'noisy')">Sorollós</span>
+                                    <span class="chip" title="Fa servir instruments que semblen naturals i tocats de forma humana." onclick="toggleTag(this, 'extra', 'organic')">Orgànic</span>
+                                    <span class="chip" title="Afegeix la grandiositat d'una formació clàssica de corda, vent i percussió." onclick="toggleTag(this, 'extra', 'orchestral')">Orquestral</span>
+                                    <span class="chip" title="Ofereix un so absolutament net i professional, sense aspreses." onclick="toggleTag(this, 'extra', 'polished')">Polit</span>
+                                    <span class="chip" title="La percussió i els inicis de cada nota colpegen de manera ràpida i contundent." onclick="toggleTag(this, 'extra', 'punchy')">Amb força (Punchy)</span>
+                                    <span class="chip" title="So directe i sense processament complex, com si fos directe del micròfon." onclick="toggleTag(this, 'extra', 'raw')">Cru</span>
+                                    <span class="chip" title="Evoca el so de dècades passades (ex. 80s) utilitzant efectes clàssics." onclick="toggleTag(this, 'extra', 'retro')">Retro</span>
+                                    <span class="chip" title="Aplica ecos llargs per donar la sensació d'estar tocant en una gran sala o església." onclick="toggleTag(this, 'extra', 'reverb-heavy')">Molta reverb</span>
+                                    <span class="chip" title="Afegeix densitat a la mescla, fent-la sonar més plena i lleugerament 'cremosa'." onclick="toggleTag(this, 'extra', 'saturated')">Saturat</span>
+                                    <span class="chip" title="Transicions fluides, sense sons estridents ni talls de ritme bruscos." onclick="toggleTag(this, 'extra', 'smooth')">Suau</span>
+                                    <span class="chip" title="Intensitat baixa, creant una sensació general de calma i intimitat." onclick="toggleTag(this, 'extra', 'soft')">Fluix / Suau</span>
+                                    <span class="chip" title="Juga molt amb els efectes estèreo i la percepció d'espai al voltant." onclick="toggleTag(this, 'extra', 'spatial')">Espacial</span>
+                                    <span class="chip" title="Elimina qualsevol ornament sonor per deixar només el més essencial de la cançó." onclick="toggleTag(this, 'extra', 'stripped-down')">Despullat / Minimalista</span>
+                                    <span class="chip" title="Basa la seva estructura en instruments electrònics en lloc d'acústics." onclick="toggleTag(this, 'extra', 'synth-driven')">Basat en sintetitzadors</span>
+                                    <span class="chip" title="Afegeix capes subtils de fons (com soroll de vinil o natura) per donar caràcter." onclick="toggleTag(this, 'extra', 'textured')">Amb textura</span>
+                                    <span class="chip" title="Tots els elements toquen de forma mil·limètrica amb el ritme, sense desajustos." onclick="toggleTag(this, 'extra', 'tight mix')">Mescla precisa</span>
+                                    <span class="chip" title="Incorpora ritmes ràpids de percussió aguda i els baixos profunds del Trap." onclick="toggleTag(this, 'extra', 'trap-influenced')">Influència Trap</span>
+                                    <span class="chip" title="So alternatiu i experimental, allunyat dels estàndards de la música més comercial." onclick="toggleTag(this, 'extra', 'underground')">Underground</span>
+                                    <span class="chip" title="Pols viu i alegre que transmet molta energia i optimisme." onclick="toggleTag(this, 'extra', 'upbeat')">Animat</span>
+                                    <span class="chip" title="Imita a la perfecció l'estètica sonora i la calidesa dels discos de fa dècades." onclick="toggleTag(this, 'extra', 'vintage')">Vintage</span>
+                                    <span class="chip" title="Situa la veu principal molt per davant de tots els instruments a la mescla." onclick="toggleTag(this, 'extra', 'vocal-centric')">Centrat en la veu</span>
+                                    <span class="chip" title="Dona protagonisme a les freqüències mitges-greus, evitant qualsevol so molest." onclick="toggleTag(this, 'extra', 'warm')">Càlid</span>
+                                    <span class="chip" title="Fa un ús abundant i evident d'efectes d'espai com reverbs, ecos i chorus." onclick="toggleTag(this, 'extra', 'wet mix')">Mescla humida (Wet mix)</span>
+                                </div>
+                            </details>
+
+                            <!-- Producció Específica (Estudi) -->
+                            <details class="bg-white border border-slate-200 rounded-lg group">
+                                <summary class="px-4 py-2.5 font-medium text-sm text-slate-700 cursor-pointer select-none flex justify-between items-center hover:bg-slate-50 transition-colors rounded-lg">
+                                    <span><i class="fa-solid fa-sliders text-purple-500 mr-2"></i> Producció Específica (Estudi)</span>
+                                    <i class="fa-solid fa-chevron-down text-slate-400 group-open:rotate-180 transition-transform text-xs"></i>
+                                </summary>
+                                <div class="px-4 pb-3 pt-2 flex flex-wrap gap-1.5 border-t border-slate-100 mt-1 max-h-60 overflow-y-auto">
+                                    <span class="chip" title="Efecte de 'bombament' on el volum resta espai cada cop que sona la percussió (bombo)." onclick="toggleTag(this, 'extra', 'sidechained')">Sidechain</span>
+                                    <span class="chip" title="Afinació vocal robòtica i perfecta, clàssica del pop modern i la música urbana." onclick="toggleTag(this, 'extra', 'autotuned')">Autotune</span>
+                                    <span class="chip" title="Ritme ajustat perfectament a la graella, sonant molt robòtic i matemàticament precís." onclick="toggleTag(this, 'extra', 'quantized')">Quantitzat</span>
+                                    <span class="chip" title="Utilitza trossos d'altres àudios gravats prèviament com a pilar central del tema." onclick="toggleTag(this, 'extra', 'sample-based')">Basat en samples</span>
+                                    <span class="chip" title="Es construeix repetint contínuament un o diversos fragments musicals breus." onclick="toggleTag(this, 'extra', 'loop-driven')">Basat en loops</span>
+                                    <span class="chip" title="Ritme complex que accentua les parts febles del compàs, molt típic del funk o jazz." onclick="toggleTag(this, 'extra', 'syncopated')">Sincopat</span>
+                                    <span class="chip" title="Ritme constant de percussió greu a cada temps del compàs, essencial en música disco/house." onclick="toggleTag(this, 'extra', 'four-on-the-floor')">Four-on-the-floor</span>
+                                    <span class="chip" title="Tècnica de remescla urbana on es redueix la velocitat de la cançó i es trosseja l'àudio." onclick="toggleTag(this, 'extra', 'chopped-and-screwed')">Chopped and screwed</span>
+                                    <span class="chip" title="Àudio 3D dissenyat especialment per a auriculars per crear una sensació espacial hiperrealista." onclick="toggleTag(this, 'extra', 'binaural')">Binaural</span>
+                                    <span class="chip" title="So central unificat sense separació d'instruments entre l'altaveu esquerre i el dret." onclick="toggleTag(this, 'extra', 'mono')">Mono</span>
+                                    <span class="chip" title="Reparteix l'àudio als extrems (esquerra i dreta), creant una sensació de so molt ample." onclick="toggleTag(this, 'extra', 'stereo-wide')">Estèreo ample</span>
+                                    <span class="chip" title="Procés final d'estudi; so fort, brillant i optimitzat per a plataformes comercials." onclick="toggleTag(this, 'extra', 'mastered')">Masteritzat</span>
+                                    <span class="chip" title="Conserva tota la variació de volum original sense l'aplicació agressiva de compressors finals." onclick="toggleTag(this, 'extra', 'unmastered')">Sense masteritzar</span>
+                                    <span class="chip" title="Compressió extrema per sonar el més fort possible de principi a fi, reduint la dinàmica al mínim." onclick="toggleTag(this, 'extra', 'brickwalled')">Limitat (Brickwalled)</span>
+                                    <span class="chip" title="So capturat purament a través de micròfons i la ressonància física dels instruments." onclick="toggleTag(this, 'extra', 'acoustic')">Acústic</span>
+                                    <span class="chip" title="Sons generats únicament mitjançant oscil·ladors i ordinadors." onclick="toggleTag(this, 'extra', 'electronic')">Electrònic</span>
+                                    <span class="chip" title="Barreja homogènia i equilibrada entre instruments físics i disseny de so electrònic." onclick="toggleTag(this, 'extra', 'hybrid-production')">Producció híbrida</span>
+                                    <span class="chip" title="Efecte clàssic que afegeix textura, presència i una dolça distorsió analògica." onclick="toggleTag(this, 'extra', 'tape-saturated')">Saturació de cinta</span>
+                                    <span class="chip" title="Incorpora estètiques sonores de discos antics, com cruixits i pols a l'agulla." onclick="toggleTag(this, 'extra', 'vinyl-emulation')">Emulació de vinil</span>
+                                    <span class="chip" title="Sonoritats abstractes generades amb l'enllaç manual de diferents parts d'un sintetitzador." onclick="toggleTag(this, 'extra', 'modular-synth')">Sintetitzador modular</span>
+                                    <span class="chip" title="Tècnica de so que resulta en sons metàl·lics tipus campana, icònics del pop dels anys vuitanta." onclick="toggleTag(this, 'extra', 'FM-synthesis')">Síntesi FM</span>
+                                    <span class="chip" title="Mètode on es parteix l'àudio en petites porcions creant capes de so complexes i irreals." onclick="toggleTag(this, 'extra', 'granular')">Granular</span>
+                                    <span class="chip" title="Un mateix acord o to que es manté sense pausa per conformar atmosferes persistents." onclick="toggleTag(this, 'extra', 'drone')">Drone</span>
+                                    <span class="chip" title="Centrat gairebé en l'experimentació sonora amb distorsions, xiuxiueigs i caos." onclick="toggleTag(this, 'extra', 'noise-music')">Música noise</span>
+                                    <span class="chip" title="Elements naturals o urbans gravats fora de l'estudi que s'incorporen a la cançó." onclick="toggleTag(this, 'extra', 'field-recording')">Gravació de camp</span>
+                                    <span class="chip" title="Característica intimista i lleugerament crua de música creada fora de grans estudis (indie)." onclick="toggleTag(this, 'extra', 'bedroom-production')">Producció d'habitació</span>
+                                </div>
+                            </details>
+
+                            <!-- Estils Contemporanis i Fusió -->
+                            <details class="bg-white border border-slate-200 rounded-lg group">
+                                <summary class="px-4 py-2.5 font-medium text-sm text-slate-700 cursor-pointer select-none flex justify-between items-center hover:bg-slate-50 transition-colors rounded-lg">
+                                    <span><i class="fa-solid fa-compact-disc text-teal-500 mr-2"></i> Estils Contemporanis i Fusió</span>
+                                    <i class="fa-solid fa-chevron-down text-slate-400 group-open:rotate-180 transition-transform text-xs"></i>
+                                </summary>
+                                <div class="px-4 pb-3 pt-2 flex flex-wrap gap-1.5 border-t border-slate-100 mt-1 max-h-60 overflow-y-auto">
+                                    <span class="chip" title="Pop accelerat, estrident i d'avantguarda, sovint usant veus molt processades amb altes freqüències." onclick="toggleTag(this, 'extra', 'hyperpop')">Hyperpop</span>
+                                    <span class="chip" title="So lent, molt processat i evocador del consumisme i internet primerenc amb forts ecos retro." onclick="toggleTag(this, 'extra', 'vaporwave')">Vaporwave</span>
+                                    <span class="chip" title="Reflex modern a l'estètica visual i a les bandes sonores centrades en sintetitzadors de l'època VHS." onclick="toggleTag(this, 'extra', 'synthwave')">Synthwave</span>
+                                    <span class="chip" title="Música reposada amb elements pop, sintetitzadors retro, ús estès d'ecos i lletres poc clares." onclick="toggleTag(this, 'extra', 'chillwave')">Chillwave</span>
+                                    <span class="chip" title="Bandes sonores tenses i dominades per la tecnologia per a mons futurs imaginaris de neó i foscor." onclick="toggleTag(this, 'extra', 'cyberpunk')">Cyberpunk</span>
+                                    <span class="chip" title="Ànima i R&B amb gran pes en sensibilitats fresques contemporànies, funk suau i hip-hop clàssic." onclick="toggleTag(this, 'extra', 'neo-soul')">Neo-soul</span>
+                                    <span class="chip" title="Estil electrònic definit per acords sintetitzats de gran volum (pads wobbling) i caigudes melòdiques." onclick="toggleTag(this, 'extra', 'future-bass')">Future bass</span>
+                                    <span class="chip" title="Electrònica de club britànica amb ritmes sincopats, baixos elàstics propis i 'samples' vocals ràpids." onclick="toggleTag(this, 'extra', 'UK-garage')">UK garage</span>
+                                    <span class="chip" title="Ritmes d'alta velocitat basats en percussions partides ('breakbeats') que acompanyen baixos densos." onclick="toggleTag(this, 'extra', 'drum-and-bass')">Drum and bass</span>
+                                    <span class="chip" title="Aportació de la polirítmia d'Àfrica occidental a tècniques urbanes globals de cançó de club." onclick="toggleTag(this, 'extra', 'afrobeat-inspired')">Influència Afrobeat</span>
+                                    <span class="chip" title="Marcat per l'estil urbà llatí de producció pop i percussions icòniques ('dembow')." onclick="toggleTag(this, 'extra', 'reggaeton-style')">Estil Reggaeton</span>
+                                    <span class="chip" title="Derivació fosc, ralentitzat i tèrbol del hip-hop, presentant 'samples' distorsionats repetitius i greus forts." onclick="toggleTag(this, 'extra', 'phonk')">Phonk</span>
+                                    <span class="chip" title="Rap embolcallat per produccions ambientals i suaus on el pes resideix en crear atmosferes nebuloses." onclick="toggleTag(this, 'extra', 'cloud-rap')">Cloud rap</span>
+                                    <span class="chip" title="Un pont entre la sensibilitat del pop o rock alternatiu i les tècniques electròniques contemporànies." onclick="toggleTag(this, 'extra', 'indie-electronic')">Electrònica indie</span>
+                                    <span class="chip" title="Composició on l'electrònica i els instruments clàssics s'integren de formes molt sofisticades." onclick="toggleTag(this, 'extra', 'electroacoustic')">Electroacústic</span>
+                                    <span class="chip" title="L'ús del timbre de grups de rock estàndard es centra a construir progressions i textures d'ambient llargues." onclick="toggleTag(this, 'extra', 'post-rock')">Post-rock</span>
+                                    <span class="chip" title="Un espès 'mur de so' construït combinant volums extrems, reverberacions i una veu angelical confusa." onclick="toggleTag(this, 'extra', 'shoegaze')">Shoegaze</span>
+                                    <span class="chip" title="Hip-hop downtempo abstracte barrejat de manera elegant amb soul, electrònica i tocs onírics foscos." onclick="toggleTag(this, 'extra', 'trip-hop')">Trip-hop</span>
+                                    <span class="chip" title="La música de ball (IDM) s'allunya de la pista incorporant ritmes fragmentats i freqüències intel·lectuals." onclick="toggleTag(this, 'extra', 'IDM')">IDM</span>
+                                    <span class="chip" title="Variants altament simplificades de percussions contínues enfocades totalment en petits sons subtils." onclick="toggleTag(this, 'extra', 'techno-minimal')">Techno minimal</span>
+                                    <span class="chip" title="La disposició estructural ideal basada en la tensió-resolució extrema, emprada a promocions èpiques." onclick="toggleTag(this, 'extra', 'cinematic-trailer-style')">Estil tràiler cinemàtic</span>
+                                </div>
+                            </details>
+                        </div>
+                    </div>
+
+                    <div class="flex flex-col sm:flex-row gap-4 pt-4 border-t border-slate-100">
+                        <button type="button" onclick="generatePrompt()" class="btn-primary flex-1 py-3 px-6 rounded-lg font-semibold text-lg flex items-center justify-center gap-2">
+                            <i class="fa-solid fa-arrows-rotate"></i>
+                            Forçar Actualització
+                        </button>
+                        <button type="button" onclick="applyPreset('reset')" class="btn-secondary py-3 px-6 rounded-lg font-medium flex items-center justify-center gap-2">
+                            <i class="fa-solid fa-trash-can"></i>
+                            Netejar
+                        </button>
+                    </div>
+                </form>
+            </div>
+            
+            <footer class="text-center text-slate-400 text-sm pb-8">
+                <p>Aquesta eina està inspirada en els generadors de prompts musicals.</p>
+                <p class="mt-1">Creada per facilitar el procés artístic a Suno AI.</p>
+            </footer>
+        </div>
+
+        <!-- Columna Dreta: Resultats i Metatags (Sticky) -->
+        <div class="lg:w-1/3">
+            <div class="sticky top-8 space-y-6">
+                
+                <!-- Resultat -->
+                <div id="resultSection" class="glass-panel p-6">
+                    <div class="flex justify-between items-center mb-4">
+                        <h2 class="text-lg font-bold text-slate-800 flex items-center gap-2">
+                            <i class="fa-solid fa-check-circle text-green-500"></i>
+                            Resultat
+                        </h2>
+                        <div class="flex items-center gap-2">
+                            <span id="loadingIndicator" class="hidden text-xs font-semibold text-blue-500">
+                                <i class="fa-solid fa-spinner fa-spin"></i> Traduïnt...
+                            </span>
+                            <span class="text-xs font-medium px-2 py-1 bg-blue-100 text-blue-800 rounded-full" id="charCount">0 car.</span>
+                        </div>
+                    </div>
+                    
+                    <div class="relative">
+                        <textarea id="outputPrompt" rows="5" class="w-full p-4 bg-slate-50 border border-slate-200 rounded-lg text-slate-800 font-mono text-sm leading-relaxed resize-none focus:outline-none focus:ring-2 focus:ring-blue-200" readonly placeholder="El teu prompt apareixerà aquí..."></textarea>
+                        
+                        <div class="absolute bottom-3 right-3">
+                            <button id="btnCopy" class="bg-white border border-slate-300 text-slate-700 hover:bg-slate-50 hover:text-blue-600 px-3 py-1.5 rounded shadow-sm transition-colors flex items-center gap-2 text-xs font-semibold">
+                                <i class="fa-regular fa-copy"></i> Copiar
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="mt-4 bg-yellow-50 border-l-4 border-yellow-400 p-3 rounded-r-lg">
+                        <p class="text-xs text-yellow-800 leading-relaxed">
+                            <i class="fa-solid fa-lightbulb text-yellow-500 mr-1"></i>
+                            Enganxa aquest text a <strong>Style of Music</strong> de Suno AI (Recomanat: màxim 120 caràcters).
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Ajudant d'Estructura de Lletres (Metatags) -->
+                <div class="glass-panel p-6 border-t-4 border-purple-500">
+                    <h2 class="text-lg font-bold text-slate-800 mb-2 flex items-center gap-2">
+                        <i class="fa-solid fa-file-audio text-purple-500"></i>
+                        Estructura de Lletres
+                    </h2>
+                    <p class="text-xs text-slate-500 mb-4 leading-relaxed">Clica les etiquetes per copiar-les i enganxa-les dins la caixa <strong>Lyrics</strong> de Suno per guiar l'estructura de la cançó.</p>
+                    
+                    <div class="flex flex-wrap gap-2">
+                        <button type="button" onclick="copyMeta('[Intro]')" class="px-2.5 py-1 bg-purple-50 text-purple-700 hover:bg-purple-100 border border-purple-200 rounded text-xs font-mono font-bold transition-colors">[Intro]</button>
+                        <button type="button" onclick="copyMeta('[Verse]')" class="px-2.5 py-1 bg-purple-50 text-purple-700 hover:bg-purple-100 border border-purple-200 rounded text-xs font-mono font-bold transition-colors">[Verse]</button>
+                        <button type="button" onclick="copyMeta('[Pre-Chorus]')" class="px-2.5 py-1 bg-purple-50 text-purple-700 hover:bg-purple-100 border border-purple-200 rounded text-xs font-mono font-bold transition-colors">[Pre-Chorus]</button>
+                        <button type="button" onclick="copyMeta('[Chorus]')" class="px-2.5 py-1 bg-purple-50 text-purple-700 hover:bg-purple-100 border border-purple-200 rounded text-xs font-mono font-bold transition-colors">[Chorus]</button>
+                        <button type="button" onclick="copyMeta('[Bridge]')" class="px-2.5 py-1 bg-purple-50 text-purple-700 hover:bg-purple-100 border border-purple-200 rounded text-xs font-mono font-bold transition-colors">[Bridge]</button>
+                        <button type="button" onclick="copyMeta('[Guitar Solo]')" class="px-2.5 py-1 bg-purple-50 text-purple-700 hover:bg-purple-100 border border-purple-200 rounded text-xs font-mono font-bold transition-colors">[Guitar Solo]</button>
+                        <button type="button" onclick="copyMeta('[Drop]')" class="px-2.5 py-1 bg-purple-50 text-purple-700 hover:bg-purple-100 border border-purple-200 rounded text-xs font-mono font-bold transition-colors">[Drop]</button>
+                        <button type="button" onclick="copyMeta('[Outro]')" class="px-2.5 py-1 bg-purple-50 text-purple-700 hover:bg-purple-100 border border-purple-200 rounded text-xs font-mono font-bold transition-colors">[Outro]</button>
+                        <button type="button" onclick="copyMeta('[End]')" class="px-2.5 py-1 bg-purple-50 text-purple-700 hover:bg-purple-100 border border-purple-200 rounded text-xs font-mono font-bold transition-colors">[End]</button>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <!-- Notificació Toast -->
+    <div id="toast" class="fixed bottom-8 left-1/2 transform -translate-x-1/2 bg-gray-900 text-white px-6 py-3 rounded-full shadow-lg flex items-center gap-3 hidden z-50">
+        <i class="fa-solid fa-check-circle text-green-400"></i>
+        <span class="font-medium" id="toastMessage">Acció completada!</span>
+    </div>
+
+    <script>
+        const MAX_CHARS = 120;
+        let typingTimer;
+        const translationCache = {};
+
+        // Traducció Automàtica amb memòria cau (Caché)
+        async function translateToEnglish(text) {
+            if (!text) return "";
+            if (translationCache[text]) return translationCache[text];
+
+            try {
+                const url = `https://api.mymemory.translated.net/get?q=${encodeURIComponent(text)}&langpair=Autodetect|en`;
+                const response = await fetch(url);
+                const data = await response.json();
+                
+                if (data && data.responseData && data.responseData.translatedText) {
+                    const translated = data.responseData.translatedText;
+                    // Ignorem els errors comuns de l'API i retornem el text original si fallen
+                    if (!translated.includes("MYMEMORY WARNING") && !translated.includes("PLEASE SELECT TWO DISTINCT LANGUAGES")) {
+                        translationCache[text] = translated;
+                        return translated;
+                    }
+                }
+                return text;
+            } catch (error) {
+                return text;
+            }
+        }
+
+        // Sistema d'Etiquetes (Reversibles)
+        function toggleTag(el, targetId, text) {
+            const input = document.getElementById(targetId);
+            let terms = input.value.split(',').map(t => t.trim()).filter(t => t !== '');
+            const index = terms.findIndex(t => t.toLowerCase() === text.toLowerCase());
+
+            if (index > -1) {
+                terms.splice(index, 1); // Elimina si ja hi és
+                el.classList.remove('chip-active');
+            } else {
+                terms.push(text); // Afegeix si no hi és
+                el.classList.add('chip-active');
+            }
+            
+            input.value = terms.join(', ');
+            generatePrompt();
+        }
+
+        // Netejar una caixa de text i els seus chips actius
+        function clearInput(targetId) {
+            document.getElementById(targetId).value = '';
+            syncChipsState();
+            generatePrompt();
+        }
+
+        // Sincronitza l'estat visual de TOTS els chips amb el text actual
+        function syncChipsState() {
+            ['instruments', 'extra'].forEach(targetId => {
+                const terms = document.getElementById(targetId).value.split(',').map(t => t.trim().toLowerCase());
+                
+                document.querySelectorAll(`.chip[onclick*="'${targetId}'"]`).forEach(c => {
+                    const match = c.getAttribute('onclick').match(/'([^']*)'\)$/);
+                    if (match && match[1]) {
+                        if (terms.includes(match[1].toLowerCase())) {
+                            c.classList.add('chip-active');
+                        } else {
+                            c.classList.remove('chip-active');
+                        }
+                    }
+                });
+            });
+        }
+
+        // Retard d'escriptura per no saturar generacions
+        function debouncedGenerate() {
+            syncChipsState(); // Actualitza els colors dels chips al moment
+            clearTimeout(typingTimer);
+            typingTimer = setTimeout(generatePrompt, 800);
+        }
+
+        // Construcció del Prompt en Temps Real
+        async function generatePrompt() {
+            const loadingInd = document.getElementById('loadingIndicator');
+            
+            const genre = document.getElementById('genre').value.trim();
+            const mood = document.getElementById('mood').value.trim();
+            const tempo = document.getElementById('tempo').value.trim();
+            const keyNote = document.getElementById('keyNote').value.trim();
+            const keyScale = document.getElementById('keyScale').value.trim();
+            const vocals = document.getElementById('vocals').value.trim();
+            
+            let instruments = document.getElementById('instruments').value.trim();
+            let extra = document.getElementById('extra').value.trim();
+
+            // 1. Dibuixem el resultat local a l'instant (Molt reactiu)
+            let parts = [];
+            if (genre) parts.push(genre);
+            if (mood) parts.push(mood);
+            if (tempo) parts.push(tempo);
+            if (vocals) parts.push(vocals);
+            
+            if (keyNote && keyScale) parts.push(`Key of ${keyNote} ${keyScale}`);
+            else if (keyNote) parts.push(`Key of ${keyNote}`);
+            else if (keyScale) parts.push(`${keyScale} scale`);
+            
+            if (instruments) parts.push(instruments);
+            if (extra) parts.push(extra);
+            
+            const localPrompt = parts.filter(p => p !== "").join(", ");
+            document.getElementById('outputPrompt').value = localPrompt;
+            updateCharCount(localPrompt.length);
+
+            // 2. Traduïm només si hi ha text lliure en segon pla
+            if (instruments || extra) {
+                loadingInd.classList.remove('hidden');
+                
+                let instTrans = instruments ? await translateToEnglish(instruments) : "";
+                let extTrans = extra ? await translateToEnglish(extra) : "";
+                
+                let transParts = [];
+                if (genre) transParts.push(genre);
+                if (mood) transParts.push(mood);
+                if (tempo) transParts.push(tempo);
+                if (vocals) transParts.push(vocals);
+                if (keyNote && keyScale) transParts.push(`Key of ${keyNote} ${keyScale}`);
+                else if (keyNote) transParts.push(`Key of ${keyNote}`);
+                else if (keyScale) transParts.push(`${keyScale} scale`);
+                if (instTrans) transParts.push(instTrans);
+                if (extTrans) transParts.push(extTrans);
+                
+                const finalTranslated = transParts.filter(p => p !== "").join(", ");
+                document.getElementById('outputPrompt').value = finalTranslated;
+                updateCharCount(finalTranslated.length);
+                
+                loadingInd.classList.add('hidden');
+            }
+        }
+
+        // Lògica per les Plantilles
+        function applyPreset(type) {
+            document.getElementById('promptForm').reset();
+            document.getElementById('instruments').value = '';
+            document.getElementById('extra').value = '';
+
+            if(type === 'epic') {
+                document.getElementById('genre').value = 'cinematic';
+                document.getElementById('mood').value = 'epic';
+                document.getElementById('tempo').value = 'mid-tempo';
+                document.getElementById('vocals').value = 'epic choir, gregorian chant';
+                document.getElementById('instruments').value = 'full orchestra, cinematic percussion';
+                document.getElementById('extra').value = 'cinematic, bass-heavy';
+            } else if(type === 'synthwave') {
+                document.getElementById('genre').value = 'synthwave';
+                document.getElementById('mood').value = 'midnight-drive';
+                document.getElementById('tempo').value = 'mid-tempo';
+                document.getElementById('vocals').value = 'instrumental';
+                document.getElementById('instruments').value = 'analog synth, drum kit';
+                document.getElementById('extra').value = 'retro, neon-lit, tape-saturated';
+            } else if(type === 'lofi') {
+                document.getElementById('genre').value = 'lo-fi hip hop';
+                document.getElementById('mood').value = 'relaxing';
+                document.getElementById('tempo').value = 'slow tempo, downtempo';
+                document.getElementById('vocals').value = 'instrumental';
+                document.getElementById('instruments').value = 'electric piano, vinyl crackle';
+                document.getElementById('extra').value = 'lo-fi, chillwave';
+            } else if(type === 'pop') {
+                document.getElementById('genre').value = 'pop';
+                document.getElementById('mood').value = 'upbeat';
+                document.getElementById('tempo').value = 'fast tempo, upbeat';
+                document.getElementById('vocals').value = 'female vocals';
+                document.getElementById('instruments').value = 'acoustic guitar, drum kit, bass guitar';
+                document.getElementById('extra').value = 'clean mix, polished';
+            }
+            
+            syncChipsState();
+            generatePrompt();
+        }
+
+        // Actualitzar contador visual
+        function updateCharCount(length) {
+            const charCount = document.getElementById('charCount');
+            charCount.textContent = `${length} car.`;
+            charCount.className = 'text-xs font-medium px-2 py-1 rounded-full transition-colors';
+            
+            if (length > MAX_CHARS) {
+                charCount.classList.add('bg-red-100', 'text-red-800');
+                charCount.innerHTML = `${length} car. <i class="fa-solid fa-triangle-exclamation ml-1" title="Suno podria tallar els prompts molt llargs"></i>`;
+            } else if (length > MAX_CHARS - 20) {
+                charCount.classList.add('bg-yellow-100', 'text-yellow-800');
+            } else {
+                charCount.classList.add('bg-blue-100', 'text-blue-800');
+            }
+        }
+
+        // Copiar Text i Mostrar Toast general
+        function showToast(msg) {
+            const toast = document.getElementById('toast');
+            document.getElementById('toastMessage').textContent = msg;
+            
+            toast.classList.remove('hidden');
+            toast.classList.add('toast-notification');
+            
+            setTimeout(() => {
+                toast.classList.add('hidden');
+                toast.classList.remove('toast-notification');
+            }, 3000);
+        }
+
+        // Copiar el Prompt
+        document.getElementById('btnCopy').addEventListener('click', () => {
+            const textToCopy = document.getElementById('outputPrompt').value;
+            if(!textToCopy) return;
+            
+            const textArea = document.createElement("textarea");
+            textArea.value = textToCopy;
+            textArea.style.position = "absolute";
+            textArea.style.left = "-999999px";
+            document.body.appendChild(textArea);
+            
+            textArea.focus();
+            textArea.select();
+            
+            try {
+                if(document.execCommand('copy')) {
+                    showToast('Prompt copiat al porta-retalls!');
+                    const btnCopy = document.getElementById('btnCopy');
+                    const originalHTML = btnCopy.innerHTML;
+                    btnCopy.innerHTML = '<i class="fa-solid fa-check text-green-500"></i> Copiat!';
+                    setTimeout(() => { btnCopy.innerHTML = originalHTML; }, 3000);
+                }
+            } catch (err) {}
+            document.body.removeChild(textArea);
+        });
+
+        // Copiar etiquetes d'estructura (Metatags)
+        function copyMeta(tag) {
+            const textArea = document.createElement("textarea");
+            textArea.value = tag;
+            textArea.style.position = "absolute";
+            textArea.style.left = "-999999px";
+            document.body.appendChild(textArea);
+            textArea.select();
+            
+            try {
+                if(document.execCommand('copy')) {
+                    showToast(`S'ha copiat l'etiqueta ${tag}`);
+                }
+            } catch (err) {}
+            document.body.removeChild(textArea);
+        }
+    </script>
+</body>
+</html>
